@@ -16,12 +16,12 @@ Encodes messages into cat sounds (`meow`, `purr`, `nya`, etc.), with optional pa
 
 All endpoints are prefixed with `/purrcrypt`.
 
-| Method | Endpoint     | Description                          |
-|--------|--------------|--------------------------------------|
-| GET    | `/api/`      | API info                             |
-| POST   | `/api/encrypt` | Encrypt text into cat sounds       |
-| POST   | `/api/decrypt` | Decrypt cat sounds back into text  |
-| GET    | `/api/health`  | Health check                       |
+| Method      | Endpoint     | Description                          |
+|-------------|--------------|--------------------------------------|
+| GET         | `/api/`      | API info                             |
+| GET / POST  | `/api/encrypt` | Encrypt text into cat sounds       |
+| GET / POST  | `/api/decrypt` | Decrypt cat sounds back into text  |
+| GET         | `/api/health`  | Health check                       |
 
 ### Encrypt
 
@@ -33,6 +33,12 @@ Content-Type: application/json
   "text": "Hello, World!",
   "password": "optional"
 }
+```
+
+Or via GET:
+
+```
+GET /api/encrypt?text=Hello%2C%20World!&password=optional
 ```
 
 **Response:**
@@ -55,6 +61,12 @@ Content-Type: application/json
   "meow": "meow purr nya ...",
   "password": "optional"
 }
+```
+
+Or via GET:
+
+```
+GET /api/decrypt?meow=meow+purr+nya+...&password=optional
 ```
 
 **Response:**

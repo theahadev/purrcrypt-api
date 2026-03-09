@@ -8,5 +8,5 @@ from .cipher import CatCipher
 from .encoder import CatEncoder
 from .crypto import encrypt_data, decrypt_data
 
-__version__ = '1.3.1'
+__version__ = '1.4.0'
 __all__ = ['CatCipher', 'CatEncoder', 'encrypt_data', 'decrypt_data']

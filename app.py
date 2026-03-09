@@ -116,30 +116,23 @@ def index():
     return jsonify(response)
 
 
-@bp.route('/encrypt', methods=['POST'])
+@bp.route('/encrypt', methods=['GET', 'POST'])
 def encrypt():
     """
     Encrypt text into cat sounds.
 
-    Expected JSON body:
-        {
-            "text": "message to encrypt",
-            "password": "optional password"
-        }
+    GET  /encrypt?text=hello&password=optional
+    POST /encrypt  JSON body: {"text": "...", "password": "..."}
 
     Returns:
         JSON with encrypted cat sounds or error
     """
     try:
-        data = request.get_json()
-        log_request('/encrypt', 'POST', data)
-
-        if not data:
-            error_msg = 'No JSON data provided'
-            log_response('/encrypt', 400, error=error_msg)
-            return jsonify({
-                'error': error_msg
-            }), 400
+        if request.method == 'GET':
+            data = request.args
+        else:
+            data = request.get_json() or {}
+        log_request('/encrypt', request.method, data)
 
         text = data.get('text')
         password = data.get('password')
@@ -185,30 +178,23 @@ def encrypt():
         }), 500
 
 
-@bp.route('/decrypt', methods=['POST'])
+@bp.route('/decrypt', methods=['GET', 'POST'])
 def decrypt():
     """
     Decrypt cat sounds back into text.
 
-    Expected JSON body:
-        {
-            "meow": "cat sounds to decrypt",
-            "password": "optional password"
-        }
+    GET  /decrypt?meow=...&password=optional
+    POST /decrypt  JSON body: {"meow": "...", "password": "..."}
 
     Returns:
         JSON with decrypted text or error
     """
     try:
-        data = request.get_json()
-        log_request('/decrypt', 'POST', data)
-
-        if not data:
-            error_msg = 'No JSON data provided'
-            log_response('/decrypt', 400, error=error_msg)
-            return jsonify({
-                'error': error_msg
-            }), 400
+        if request.method == 'GET':
+            data = request.args
+        else:
+            data = request.get_json() or {}
+        log_request('/decrypt', request.method, data)
 
         meow = data.get('meow')
         password = data.get('password')
