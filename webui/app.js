@@ -3,8 +3,8 @@
  * Uses the PurrCrypt API for encryption/decryption
  */
 
-// Initialize API client
-let api = new PurrCryptAPI("https://api.ahathe.dev/purrcrypt");
+// Initialize API client — URL comes from config.js
+let api = new PurrCryptAPI(PURRCRYPT_CONFIG.apiUrl);
 
 // Current mode: 'decrypt' or 'encrypt'
 let currentMode = "encrypt";

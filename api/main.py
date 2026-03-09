@@ -12,6 +12,7 @@ import getpass
 from pathlib import Path
 
 from .cipher import CatCipher
+from . import __version__ as VERSION
 
 
 class PurrCryptCLI:
@@ -229,7 +230,7 @@ For more information, visit: https://github.com/yourusername/purrcrypt
     parser.add_argument(
         '--version',
         action='version',
-        version='PurrCrypt Python 1.3.0'
+        version='PurrCrypt Python ' + VERSION
     )
 
     # Create subparsers for commands

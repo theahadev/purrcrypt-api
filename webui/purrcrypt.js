@@ -5,7 +5,7 @@
  */
 
 class PurrCryptAPI {
-  constructor(apiUrl = "https://api.ahathe.dev/purrcrypt") {
+  constructor(apiUrl = PURRCRYPT_CONFIG.apiUrl) {
     // Remove trailing slash to prevent double slashes in URLs
     this.apiUrl = apiUrl.replace(/\/+$/, "");
   }

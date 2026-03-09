@@ -16,17 +16,17 @@ Encodes messages into cat sounds (`meow`, `purr`, `nya`, etc.), with optional pa
 
 All endpoints are prefixed with `/purrcrypt`.
 
-| Method | Endpoint   | Description                          |
-|--------|------------|--------------------------------------|
-| GET    | `/`        | API info                             |
-| POST   | `/encrypt` | Encrypt text into cat sounds         |
-| POST   | `/decrypt` | Decrypt cat sounds back into text    |
-| GET    | `/health`  | Health check                         |
+| Method | Endpoint     | Description                          |
+|--------|--------------|--------------------------------------|
+| GET    | `/api/`      | API info                             |
+| POST   | `/api/encrypt` | Encrypt text into cat sounds       |
+| POST   | `/api/decrypt` | Decrypt cat sounds back into text  |
+| GET    | `/api/health`  | Health check                       |
 
 ### Encrypt
 
 ```http
-POST /purrcrypt/encrypt
+POST /api/encrypt
 Content-Type: application/json
 
 {
@@ -48,7 +48,7 @@ Content-Type: application/json
 ### Decrypt
 
 ```http
-POST /purrcrypt/decrypt
+POST /api/decrypt
 Content-Type: application/json
 
 {
@@ -85,13 +85,14 @@ docker network create proxy
 
 ### Environment Variables
 
-| Variable          | Default                              | Description                        |
-|-------------------|--------------------------------------|------------------------------------|
-| `HOST`            | `0.0.0.0`                            | Bind address                       |
-| `PORT`            | `5000`                               | Port to listen on                  |
-| `API_URL`         | `http://localhost:5000`              | Public API URL (used by health check) |
-| `DEBUG`           | `false`                              | Enable debug logging               |
-| `PYTHONUNBUFFERED`| `1`                                  | Unbuffered Python output           |
+| Variable     | Default               | Description                                              |
+|--------------|-----------------------|----------------------------------------------------------|
+| `HOST`       | `0.0.0.0`             | Bind address                                             |
+| `PORT`       | `5000`                | Port to listen on                                        |
+| `API_PREFIX` | `/api`                | URL prefix for all API routes                            |
+| `API_URL`    | `http://localhost:PORT` | Base URL used by the health check to call itself. Only needed when running behind a reverse-proxy. |
+| `DEBUG`      | `false`               | Enable debug logging                                     |
+| `PYTHONUNBUFFERED` | `1`             | Unbuffered Python output                                 |
 
 ## Running Locally
 

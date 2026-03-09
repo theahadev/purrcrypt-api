@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-api.py - HTTP API for PurrCrypt
+app.py - HTTP API for PurrCrypt
 
 This module provides a REST API for encrypting and decrypting messages
 into adorable cat sounds.
 
-Endpoints:
+Endpoints (all prefixed by API_PREFIX, default /api):
     GET  /         - Basic API information
     POST /encrypt  - Encrypt text with password
     POST /decrypt  - Decrypt cat sounds with password
@@ -15,9 +15,8 @@ Endpoints:
 import os
 import sys
 import logging
-from datetime import datetime
 from pathlib import Path
-from flask import Flask, request, jsonify
+from flask import Flask, Blueprint, request, jsonify
 from flask_cors import CORS
 import requests
 
@@ -25,6 +24,10 @@ import requests
 sys.path.insert(0, str(Path(__file__).parent))
 
 from api.cipher import CatCipher
+from api import __version__ as VERSION
+
+# Route prefix for all endpoints — override with API_PREFIX env var
+API_PREFIX = os.environ.get('API_PREFIX', '/api').rstrip('/')
 
 # Configure logging
 logging.basicConfig(
@@ -37,6 +40,7 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 cipher = CatCipher()
+bp = Blueprint('purrcrypt', __name__)
 
 # Check if debug mode is enabled
 DEBUG_MODE = os.environ.get('DEBUG', 'False').lower() == 'true'
@@ -85,7 +89,7 @@ def log_response(endpoint, status_code, response_data=None, error=None):
         logger.debug(f"  Response data: {response_data}")
 
 
-@app.route('/purrcrypt/', methods=['GET'])
+@bp.route('/', methods=['GET'])
 def index():
     """
     Basic API information endpoint.
@@ -97,13 +101,13 @@ def index():
 
     response = {
         'name': 'PurrCrypt API',
-        'version': '1.3.0',
+        'version': VERSION,
         'description': 'Encrypt messages into cat sounds!',
         'endpoints': {
-            '/': 'GET - API information',
-            '/encrypt': 'POST - Encrypt text (fields: text, password)',
-            '/decrypt': 'POST - Decrypt cat sounds (fields: meow, password)',
-            '/health': 'GET - Health check'
+            f'{API_PREFIX}/': 'GET - API information',
+            f'{API_PREFIX}/encrypt': 'POST - Encrypt text (fields: text, password)',
+            f'{API_PREFIX}/decrypt': 'POST - Decrypt cat sounds (fields: meow, password)',
+            f'{API_PREFIX}/health': 'GET - Health check'
         },
         'github': 'https://github.com/theahadev/purrcrypt-api'
     }
@@ -112,7 +116,7 @@ def index():
     return jsonify(response)
 
 
-@app.route('/purrcrypt/encrypt', methods=['POST'])
+@bp.route('/encrypt', methods=['POST'])
 def encrypt():
     """
     Encrypt text into cat sounds.
@@ -181,7 +185,7 @@ def encrypt():
         }), 500
 
 
-@app.route('/purrcrypt/decrypt', methods=['POST'])
+@bp.route('/decrypt', methods=['POST'])
 def decrypt():
     """
     Decrypt cat sounds back into text.
@@ -287,13 +291,12 @@ def decrypt():
         }), 500
 
 
-@app.route('/purrcrypt/health', methods=['GET'])
+@bp.route('/health', methods=['GET'])
 def health():
     """
     Health check endpoint.
 
-    Calls the API_URL environment variable (or localhost fallback) to verify
-    the service is running correctly.
+    Calls the API index to verify the service is running correctly.
 
     Returns:
         JSON with health status
@@ -301,22 +304,20 @@ def health():
     log_request('/health', 'GET')
 
     try:
-        # Get API URL from environment variable or use localhost
-        api_url = os.environ.get('API_URL', 'http://localhost:5000')
-
-        # Make sure URL doesn't end with slash
-        api_url = api_url.rstrip('/')
+        port = os.environ.get('PORT', 5000)
+        api_url = os.environ.get('API_URL', f'http://localhost:{port}').rstrip('/')
+        check_url = f'{api_url}{API_PREFIX}/'
 
         if DEBUG_MODE:
-            logger.debug(f"  Health check: calling {api_url}/")
+            logger.debug(f"  Health check: calling {check_url}")
 
-        # Call the root endpoint to check if API is responding
-        response = requests.get(f'{api_url}/', timeout=5)
+        # Call the index endpoint to check if API is responding
+        response = requests.get(check_url, timeout=5)
 
         if response.status_code == 200:
             result = {
                 'status': 'OK',
-                'api_url': api_url,
+                'api_url': check_url,
                 'api_responsive': True
             }
             log_response('/health', 200, result)
@@ -326,7 +327,7 @@ def health():
             result = {
                 'status': 'ERROR',
                 'error': error_msg,
-                'api_url': api_url,
+                'api_url': check_url,
                 'api_responsive': False
             }
             log_response('/health', 503, error=error_msg)
@@ -337,7 +338,7 @@ def health():
         result = {
             'status': 'ERROR',
             'error': error_msg,
-            'api_url': api_url,
+            'api_url': check_url,
             'api_responsive': False
         }
         log_response('/health', 503, error=error_msg)
@@ -348,7 +349,7 @@ def health():
         result = {
             'status': 'ERROR',
             'error': error_msg,
-            'api_url': api_url,
+            'api_url': check_url,
             'api_responsive': False
         }
         log_response('/health', 503, error=error_msg)
@@ -359,7 +360,7 @@ def health():
         result = {
             'status': 'ERROR',
             'error': error_msg,
-            'api_url': api_url,
+            'api_url': check_url,
             'api_responsive': False
         }
         log_response('/health', 503, error=error_msg)
@@ -372,7 +373,12 @@ def not_found(error):
     logger.warning(f"404 Error: {request.path} not found - Client: {request.remote_addr}")
     return jsonify({
         'error': 'Endpoint not found',
-        'available_endpoints': ['/', '/encrypt', '/decrypt', '/health']
+        'available_endpoints': [
+            f'{API_PREFIX}/',
+            f'{API_PREFIX}/encrypt',
+            f'{API_PREFIX}/decrypt',
+            f'{API_PREFIX}/health',
+        ]
     }), 404
 
 
@@ -394,6 +400,9 @@ def internal_error(error):
     }), 500
 
 
+app.register_blueprint(bp, url_prefix=API_PREFIX)
+
+
 if __name__ == '__main__':
     # Get port from environment variable or use default
     port = int(os.environ.get('PORT', 5000))
@@ -401,11 +410,11 @@ if __name__ == '__main__':
     debug = os.environ.get('DEBUG', 'False').lower() == 'true'
 
     print(f"🐱 PurrCrypt API starting on {host}:{port}")
+    print(f"   API prefix: {API_PREFIX}")
     print(f"   Debug mode: {debug}")
     print(f"   Logging level: {'DEBUG' if DEBUG_MODE else 'INFO'}")
-    print(f"   Health check URL: {os.environ.get('API_URL', 'http://localhost:5000')}")
 
-    logger.info(f"Starting PurrCrypt API server on {host}:{port}")
+    logger.info(f"Starting PurrCrypt API server on {host}:{port} (prefix: {API_PREFIX})")
     if DEBUG_MODE:
         logger.debug("Debug logging enabled - all requests and responses will be logged")
 

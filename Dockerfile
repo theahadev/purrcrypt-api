@@ -33,8 +33,9 @@ ENV PORT=5000
 EXPOSE 5000
 
 # Health check
+# Health check — uses API_PREFIX env var (defaults to /api)
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:5000/health || exit 1
+    CMD curl -f "http://localhost:${PORT:-5000}${API_PREFIX:-/api}/health" || exit 1
 
 # Run the Flask API with Gunicorn (production WSGI server)
 # 4 workers, binding to all interfaces, with access logging
