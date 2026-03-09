@@ -1,9 +1,6 @@
 services:
   purr-api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: purrcrypt-api:latest
+    image: ghcr.io/theahadev/purrcrypt-api:latest
     container_name: purrcrypt-api
     environment:
       - HOST=0.0.0.0

@@ -140,6 +140,14 @@ purrcrypt-api/
 └── requirements.txt
 ```
 
+## Known Bugs
+
+### `API_PREFIX` env var not applied when using the prebuilt image
+
+When pulling the image from `ghcr.io` and setting `API_PREFIX` via the environment, the prefix is ignored and routes remain on the default `/api` path. This appears to affect the prebuilt image only — building locally from the `Dockerfile` works as expected.
+
+**Workaround:** Build the image locally with `docker compose build` and use that instead of the prebuilt image.
+
 ## ⚠️ Security Warning
 
 This project uses XOR encryption with a SHA-256-derived key. **It is not cryptographically secure** and should not be used to protect sensitive data. It's a fun toy, not a real cipher.
