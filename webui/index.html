@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>PurrCrypt - Secure Encryption</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div class="api-status" id="api-status">
+            <span class="status-indicator">●</span>
+            <span class="status-text">Checking API...</span>
+        </div>
+
+        <div class="container">
+            <header class="header">
+                <div class="logo">
+                    <h1>PurrCrypt</h1>
+                </div>
+                <p class="tagline">Secure Encryption Tool</p>
+            </header>
+
+            <div class="tabs">
+                <button class="tab-button active" data-tab="encrypt">
+                    Encrypt
+                </button>
+                <button class="tab-button" data-tab="decrypt">Decrypt</button>
+            </div>
+
+            <div class="tab-content">
+                <div class="card">
+                    <h2 id="main-heading">Encrypt Your Message</h2>
+
+                    <div class="form-group">
+                        <label for="main-input">
+                            <span class="label-icon" id="input-label"
+                                >Input</span
+                            >
+                        </label>
+                        <textarea
+                            id="main-input"
+                            placeholder="Enter your message here..."
+                            rows="6"
+                        ></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="main-password">
+                            <span class="label-icon" id="password-label"
+                                >Password (Optional)</span
+                            >
+                        </label>
+                        <input
+                            type="password"
+                            id="main-password"
+                            placeholder="Leave empty for no password"
+                        />
+                    </div>
+
+                    <button class="btn btn-primary" id="main-btn">
+                        <span class="btn-icon" id="button-label"
+                            >Encrypt Message</span
+                        >
+                    </button>
+
+                    <div
+                        class="form-group output-group"
+                        id="output-group"
+                        style="display: none"
+                    >
+                        <label for="main-output">
+                            <span class="label-icon" id="output-label"
+                                >Encrypted Output</span
+                            >
+                            <button
+                                class="btn-copy"
+                                id="copy-output"
+                                title="Copy to clipboard"
+                            >
+                                Copy
+                            </button>
+                        </label>
+                        <textarea id="main-output" readonly rows="8"></textarea>
+                        <div
+                            class="stats"
+                            id="stats"
+                            style="display: none"
+                        ></div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="footer">
+                <p>PurrCrypt Encryption Tool</p>
+                <p class="footer-note" id="api-version-footer">
+                    API Version: <span id="api-version">Loading...</span>
+                </p>
+                <p class="footer-note">
+                    <small
+                        >Tip: Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to
+                        encrypt/decrypt quickly.</small
+                    >
+                </p>
+            </footer>
+        </div>
+
+        <div class="toast" id="toast"></div>
+
+        <script src="purrcrypt.js"></script>
+        <script src="app.js"></script>
+    </body>
+</html>

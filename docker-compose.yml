@@ -1,0 +1,56 @@
+services:
+  purr-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: purrcrypt-api:latest
+    container_name: purrcrypt-api
+    environment:
+      - HOST=0.0.0.0
+      - PORT=5000
+      - API_URL=http://api.ahathe.dev/purrcrypt
+      - PYTHONUNBUFFERED=1
+      - DEBUG=true
+    restart: unless-stopped
+    volumes:
+      - ./app.py:/app/app.py:ro
+      - ./api/:/app/api/:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/purrcrypt/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+    networks:
+      - proxy
+
+  purr-web:
+    image: sigoden/dufs:latest
+    container_name: purrcrypt-webui
+    restart: unless-stopped
+    user: "1000:1000"
+#    ports:
+#      - "5000:5000"
+    volumes:
+      - ./webui:/data:ro
+    command: >
+      /data
+      --bind 0.0.0.0
+      --port 5000
+      --enable-cors
+      --render-index
+      --render-spa
+    environment:
+      - TZ=UTC
+    networks:
+      - proxy
+
+
+networks:
+  proxy:
+    external: true

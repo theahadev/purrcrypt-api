@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>PurrCrypt API Test Page</title>
+        <style>
+            body {
+                font-family: "Courier New", monospace;
+                max-width: 800px;
+                margin: 50px auto;
+                padding: 20px;
+                background: #1a1a2e;
+                color: #eee;
+            }
+            h1 {
+                color: #ff6b9d;
+                text-align: center;
+            }
+            .api-config {
+                background: #16213e;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 10px;
+                border-left: 4px solid #ffd93d;
+            }
+            .api-config input {
+                width: 100%;
+                padding: 10px;
+                background: #0f1729;
+                border: 1px solid #2a3f5f;
+                color: #eee;
+                border-radius: 5px;
+                font-family: "Courier New", monospace;
+            }
+            .test-section {
+                background: #16213e;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 10px;
+                border-left: 4px solid #ff6b9d;
+            }
+            .test-section h2 {
+                color: #ffd93d;
+                margin-top: 0;
+            }
+            pre {
+                background: #0f1729;
+                padding: 15px;
+                border-radius: 5px;
+                overflow-x: auto;
+                border: 1px solid #2a3f5f;
+            }
+            .success {
+                color: #6bcf7f;
+            }
+            .error {
+                color: #ff6b6b;
+            }
+            .warning {
+                color: #ffd93d;
+            }
+            button {
+                background: linear-gradient(45deg, #ff6b9d, #ffd93d);
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: bold;
+                margin: 10px 5px;
+            }
+            button:hover {
+                opacity: 0.9;
+            }
+            button:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+            .result {
+                margin-top: 10px;
+                padding: 10px;
+                background: #0f1729;
+                border-radius: 5px;
+                min-height: 20px;
+            }
+            .status-badge {
+                display: inline-block;
+                padding: 5px 15px;
+                border-radius: 20px;
+                font-size: 0.85rem;
+                font-weight: bold;
+                margin-left: 10px;
+            }
+            .status-badge.connected {
+                background: rgba(107, 207, 127, 0.2);
+                color: #6bcf7f;
+                border: 1px solid #6bcf7f;
+            }
+            .status-badge.disconnected {
+                background: rgba(255, 107, 107, 0.2);
+                color: #ff6b6b;
+                border: 1px solid #ff6b6b;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>PurrCrypt API Test Suite</h1>
+
+        <div class="api-config">
+            <h2>API Configuration</h2>
+            <label for="api-url">API URL:</label>
+            <input
+                type="text"
+                id="api-url"
+                value="https://api.ahathe.dev/purrcrypt"
+                placeholder="https://api.ahathe.dev/purrcrypt"
+            />
+            <button onclick="checkConnection()" style="margin-top: 10px">
+                Test Connection
+            </button>
+            <span id="connection-status"></span>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 1: Basic Encryption (No Password)</h2>
+            <p>Testing basic text to cat sounds conversion via API...</p>
+            <button onclick="runTest1()">Run Test 1</button>
+            <div id="test1-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 2: Encryption with Password</h2>
+            <p>Testing password-protected encryption...</p>
+            <button onclick="runTest2()">Run Test 2</button>
+            <div id="test2-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 3: Round-trip Test</h2>
+            <p>Testing encrypt → decrypt cycle...</p>
+            <button onclick="runTest3()">Run Test 3</button>
+            <div id="test3-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 4: Long Message</h2>
+            <p>Testing with longer text...</p>
+            <button onclick="runTest4()">Run Test 4</button>
+            <div id="test4-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 5: Unicode Support</h2>
+            <p>Testing with emoji and special characters...</p>
+            <button onclick="runTest5()">Run Test 5</button>
+            <div id="test5-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 6: Wrong Password Detection</h2>
+            <p>Testing decryption with incorrect password...</p>
+            <button onclick="runTest6()">Run Test 6</button>
+            <div id="test6-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 7: API Error Handling</h2>
+            <p>Testing error handling for invalid requests...</p>
+            <button onclick="runTest7()">Run Test 7</button>
+            <div id="test7-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Run All Tests</h2>
+            <button onclick="runAllTests()">Run All Tests</button>
+        </div>
+
+        <script src="purrcrypt.js"></script>
+        <script>
+            let api;
+
+            function initAPI() {
+                const apiUrl = document.getElementById("api-url").value;
+                api = new PurrCryptAPI(apiUrl);
+            }
+
+            function log(elementId, message, className = "success") {
+                const element = document.getElementById(elementId);
+                element.innerHTML += `<div class="${className}">${message}</div>`;
+            }
+
+            function clearLog(elementId) {
+                document.getElementById(elementId).innerHTML = "";
+            }
+
+            async function checkConnection() {
+                initAPI();
+                const statusElement =
+                    document.getElementById("connection-status");
+
+                try {
+                    const isHealthy = await api.checkHealth();
+
+                    if (isHealthy) {
+                        statusElement.innerHTML =
+                            '<span class="status-badge connected">[OK] Connected</span>';
+                        const info = await api.getInfo();
+                        console.log("API Info:", info);
+                    } else {
+                        statusElement.innerHTML =
+                            '<span class="status-badge disconnected">[ERROR] Disconnected</span>';
+                    }
+                } catch (error) {
+                    statusElement.innerHTML =
+                        '<span class="status-badge disconnected">[ERROR] ' +
+                        error.message +
+                        "</span>";
+                }
+            }
+
+            async function runTest1() {
+                initAPI();
+                clearLog("test1-result");
+                log("test1-result", "[TEST] Starting Test 1...");
+
+                try {
+                    const original = "Hello, World!";
+                    log("test1-result", `Original: "${original}"`);
+
+                    const encrypted = await api.encrypt(original);
+                    log("test1-result", `Encrypted: "${encrypted}"`);
+
+                    const decrypted = await api.decrypt(encrypted);
+                    log("test1-result", `Decrypted: "${decrypted}"`);
+
+                    if (original === decrypted) {
+                        log("test1-result", "[PASS] Test 1 PASSED");
+                    } else {
+                        log(
+                            "test1-result",
+                            "[FAIL] Test 1 FAILED - Decrypted text does not match",
+                            "error",
+                        );
+                    }
+                } catch (error) {
+                    log(
+                        "test1-result",
+                        `[ERROR] Test 1 ERROR: ${error.message}`,
+                        "error",
+                    );
+                }
+            }
+
+            async function runTest2() {
+                initAPI();
+                clearLog("test2-result");
+                log("test2-result", "[TEST] Starting Test 2...");
+
+                try {
+                    const original = "Secret Message";
+                    const password = "mypassword123";
+                    log("test2-result", `Original: "${original}"`);
+                    log("test2-result", `Password: "${password}"`);
+
+                    const encrypted = await api.encrypt(original, password);
+                    log("test2-result", `Encrypted: "${encrypted}"`);
+
+                    const decrypted = await api.decrypt(encrypted, password);
+                    log("test2-result", `Decrypted: "${decrypted}"`);
+
+                    if (original === decrypted) {
+                        log("test2-result", "[PASS] Test 2 PASSED");
+                    } else {
+                        log(
+                            "test2-result",
+                            "[FAIL] Test 2 FAILED - Decrypted text does not match",
+                            "error",
+                        );
+                    }
+                } catch (error) {
+                    log(
+                        "test2-result",
+                        `[ERROR] Test 2 ERROR: ${error.message}`,
+                        "error",
+                    );
+                }
+            }
+
+            async function runTest3() {
+                initAPI();
+                clearLog("test3-result");
+                log("test3-result", "[TEST] Starting Test 3...");
+
+                try {
+                    const messages = [
+                        "Test message 1",
+                        "Another test!",
+                        "12345",
+                        "a",
+                        "Special chars: @#$%",
+                    ];
+
+                    let passed = 0;
+                    let failed = 0;
+
+                    for (const msg of messages) {
+                        const encrypted = await api.encrypt(msg);
+                        const decrypted = await api.decrypt(encrypted);
+
+                        if (msg === decrypted) {
+                            passed++;
+                            log("test3-result", `[OK] "${msg}" passed`);
+                        } else {
+                            failed++;
+                            log("test3-result", `[X] "${msg}" failed`, "error");
+                        }
+                    }
+
+                    log(
+                        "test3-result",
+                        `Results: ${passed} passed, ${failed} failed`,
+                    );
+
+                    if (failed === 0) {
+                        log("test3-result", "[PASS] Test 3 PASSED");
+                    } else {
+                        log(
+                            "test3-result",
+                            `[FAIL] Test 3 FAILED - ${failed} subtests failed`,
+                            "error",
+                        );
+                    }
+                } catch (error) {
+                    log(
+                        "test3-result",
+                        `[ERROR] Test 3 ERROR: ${error.message}`,
+                        "error",
+                    );
+                }
+            }
+
+            async function runTest4() {
+                initAPI();
+                clearLog("test4-result");
+                log("test4-result", "[TEST] Starting Test 4...");
+
+                try {
+                    const original =
+                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
+                        "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. " +
+                        "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.";
+
+                    log(
+                        "test4-result",
+                        `Original length: ${original.length} characters`,
+                    );
+
+                    const encrypted = await api.encrypt(original);
+                    log(
+                        "test4-result",
+                        `Encrypted length: ${encrypted.length} characters`,
+                    );
+                    log(
+                        "test4-result",
+                        `Word count: ${encrypted.split(/\s+/).length} cat words`,
+                    );
+
+                    const decrypted = await api.decrypt(encrypted);
+
+                    if (original === decrypted) {
+                        log("test4-result", "[PASS] Test 4 PASSED");
+                    } else {
+                        log(
+                            "test4-result",
+                            "[FAIL] Test 4 FAILED - Decrypted text does not match",
+                            "error",
+                        );
+                    }
+                } catch (error) {
+                    log(
+                        "test4-result",
+                        `[ERROR] Test 4 ERROR: ${error.message}`,
+                        "error",
+                    );
+                }
+            }
+
+            async function runTest5() {
+                initAPI();
+                clearLog("test5-result");
+                log("test5-result", "[TEST] Starting Test 5...");
+
+                try {
+                    const original = "Hello World! Unicode test: 你好 Привіт";
+                    log("test5-result", `Original: "${original}"`);
+
+                    const encrypted = await api.encrypt(original);
+                    log("test5-result", `Encrypted successfully`);
+
+                    const decrypted = await api.decrypt(encrypted);
+                    log("test5-result", `Decrypted: "${decrypted}"`);
+
+                    if (original === decrypted) {
+                        log("test5-result", "[PASS] Test 5 PASSED");
+                    } else {
+                        log(
+                            "test5-result",
+                            "[FAIL] Test 5 FAILED - Decrypted text does not match",
+                            "error",
+                        );
+                    }
+                } catch (error) {
+                    log(
+                        "test5-result",
+                        `[ERROR] Test 5 ERROR: ${error.message}`,
+                        "error",
+                    );
+                }
+            }
+
+            async function runTest6() {
+                initAPI();
+                clearLog("test6-result");
+                log("test6-result", "[TEST] Starting Test 6...");
+
+                try {
+                    const original = "Protected message";
+                    const correctPassword = "correct";
+                    const wrongPassword = "wrong";
+
+                    log(
+                        "test6-result",
+                        `Encrypting with password: "${correctPassword}"`,
+                    );
+                    const encrypted = await api.encrypt(
+                        original,
+                        correctPassword,
+                    );
+
+                    log(
+                        "test6-result",
+                        `Attempting to decrypt with wrong password: "${wrongPassword}"`,
+                    );
+
+                    try {
+                        const decrypted = await api.decrypt(
+                            encrypted,
+                            wrongPassword,
+                        );
+
+                        if (original !== decrypted) {
+                            log(
+                                "test6-result",
+                                "[PASS] Test 6 PASSED - Wrong password produced different/invalid result",
+                            );
+                        } else {
+                            log(
+                                "test6-result",
+                                "[FAIL] Test 6 FAILED - Wrong password should not decrypt correctly",
+                                "error",
+                            );
+                        }
+                    } catch (error) {
+                        // API should reject wrong password
+                        log(
+                            "test6-result",
+                            `Wrong password rejected by API: ${error.message}`,
+                            "warning",
+                        );
+                        log(
+                            "test6-result",
+                            "[PASS] Test 6 PASSED - API properly rejected wrong password",
+                        );
+                    }
+                } catch (error) {
+                    log(
+                        "test6-result",
+                        `[ERROR] Test 6 ERROR: ${error.message}`,
+                        "error",
+                    );
+                }
+            }
+
+            async function runTest7() {
+                initAPI();
+                clearLog("test7-result");
+                log("test7-result", "[TEST] Starting Test 7...");
+
+                let passed = 0;
+                let failed = 0;
+
+                // Test 7a: Empty text
+                try {
+                    await api.encrypt("");
+                    log(
+                        "test7-result",
+                        "[X] Test 7a FAILED - Should reject empty text",
+                        "error",
+                    );
+                    failed++;
+                } catch (error) {
+                    log(
+                        "test7-result",
+                        `[OK] Test 7a PASSED - Empty text rejected: ${error.message}`,
+                    );
+                    passed++;
+                }
+
+                // Test 7b: Invalid cat sounds
+                try {
+                    await api.decrypt("this is not cat sounds");
+                    log(
+                        "test7-result",
+                        "[X] Test 7b FAILED - Should reject invalid cat sounds",
+                        "error",
+                    );
+                    failed++;
+                } catch (error) {
+                    log(
+                        "test7-result",
+                        `[OK] Test 7b PASSED - Invalid sounds rejected: ${error.message}`,
+                    );
+                    passed++;
+                }
+
+                log(
+                    "test7-result",
+                    `Results: ${passed} passed, ${failed} failed`,
+                );
+
+                if (failed === 0) {
+                    log("test7-result", "[PASS] Test 7 PASSED");
+                } else {
+                    log(
+                        "test7-result",
+                        `[FAIL] Test 7 FAILED - ${failed} subtests failed`,
+                        "error",
+                    );
+                }
+            }
+
+            async function runAllTests() {
+                await checkConnection();
+                await new Promise((resolve) => setTimeout(resolve, 500));
+                await runTest1();
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                await runTest2();
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                await runTest3();
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                await runTest4();
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                await runTest5();
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                await runTest6();
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                await runTest7();
+            }
+
+            // Initialize on page load
+            window.addEventListener("load", async () => {
+                console.log("PurrCrypt API Test Page Loaded!");
+                console.log(
+                    'Configure the API URL and click "Test Connection" to get started',
+                );
+
+                initAPI();
+                await checkConnection();
+            });
+        </script>
+    </body>
+</html>
