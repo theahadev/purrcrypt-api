@@ -1,4 +1,4 @@
-# purrcrypt-api 🐱
+# purrcrypt-api
 
 A worse version of [purrcrypt](https://github.com/vxfemboy/purrcrypt) with an API and a WebUI, made for personal use in Python. **Not cryptographically secure for any real use.**
 
