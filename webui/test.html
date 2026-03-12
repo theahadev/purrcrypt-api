@@ -113,7 +113,6 @@
             <input
                 type="text"
                 id="api-url"
-                value="./api"
                 placeholder="./api"
             />
             <button onclick="checkConnection()" style="margin-top: 10px">
@@ -179,6 +178,8 @@
         <script src="config.js"></script>
         <script src="purrcrypt.js"></script>
         <script>
+            document.getElementById("api-url").value = PURRCRYPT_CONFIG.apiUrl;
+
             let api;
 
             function initAPI() {
