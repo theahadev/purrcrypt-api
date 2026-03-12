@@ -86,14 +86,8 @@ docker compose up -d
 ```
 
 This starts two services:
-- **`purrcrypt-api`** — Flask API on port 5000 (internal)
-- **`purrcrypt-webui`** — Static WebUI served by dufs (internal)
-
-Both services join an external Docker network named `proxy`. Create it first if it doesn't exist:
-
-```bash
-docker network create proxy
-```
+- **`purrcrypt-api`** — Flask API on port 5000
+- **`purrcrypt-webui`** — Static WebUI served by dufs
 
 ### Environment Variables
 
@@ -104,7 +98,6 @@ docker network create proxy
 | `API_PREFIX` | `/api`                | URL prefix for all API routes                            |
 | `API_URL`    | `http://localhost:PORT` | Base URL used by the health check to call itself. Only needed when running behind a reverse-proxy. |
 | `DEBUG`      | `false`               | Enable debug logging                                     |
-| `PYTHONUNBUFFERED` | `1`             | Unbuffered Python output                                 |
 
 ## Running Locally
 
@@ -113,7 +106,7 @@ pip install -r requirements.txt
 python app.py
 ```
 
-The API will be available at `http://localhost:5000/purrcrypt`.
+The API will be available at `http://localhost:5000/api`.
 
 ## CLI Usage
 
@@ -139,14 +132,6 @@ purrcrypt-api/
 ├── docker-compose.yml
 └── requirements.txt
 ```
-
-## Known Bugs
-
-### `API_PREFIX` env var not applied when using the prebuilt image
-
-When pulling the image from `ghcr.io` and setting `API_PREFIX` via the environment, the prefix is ignored and routes remain on the default `/api` path. This appears to affect the prebuilt image only — building locally from the `Dockerfile` works as expected.
-
-**Workaround:** Build the image locally with `docker compose build` and use that instead of the prebuilt image.
 
 ## ⚠️ Security Warning
 

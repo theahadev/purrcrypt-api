@@ -12,10 +12,11 @@ RUN apt-get update && apt-get install -y \
 
 # Copy Python application files
 COPY requirements.txt .
+COPY app.py .
+COPY api/ ./api/
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt && \
-    echo "✓ Python dependencies installed"
+RUN pip install --no-cache-dir -r requirements.txt     
 
 # Create a non-root user for security
 RUN useradd -m -u 1000 purrcrypt && \
@@ -39,4 +40,5 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 
 # Run the Flask API with Gunicorn (production WSGI server)
 # 4 workers, binding to all interfaces, with access logging
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--access-logfile", "-", "--error-logfile", "-", "app:app"]
+CMD ["gunicorn", "--bind", "{HOST:-0.0.0.0}:{PORT:-5000}", "--workers", "4", "--access-logfile", "-", "--error-logfile", "-", "app:app"]
+
